@@ -12,6 +12,8 @@ yarn.lock
 keys/
 *.pem
 *.key
+RenjitGitFile
+RenjitGitFile.pub
 
 # Logs
 logs/
