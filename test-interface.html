@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAE Open Finance Insurance API - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-indicator.connected {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-box pre {
+            margin: 0;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #333;
+        }
+
+        .success {
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+
+        .info {
+            border-left: 4px solid #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .token-display {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .insurance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .insurance-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .insurance-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .insurance-card.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .quote-list {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .quote-item {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .quote-item:last-child {
+            border-bottom: none;
+        }
+
+        .quote-info {
+            flex: 1;
+        }
+
+        .quote-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-pending {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-accepted {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-rejected {
+            background: #dc3545;
+            color: white;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 UAE Open Finance Insurance API</h1>
+            <p>Interactive Testing Interface - Test all 7 insurance types</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Checking connection...</span>
+            </div>
+            <div class="status-item">
+                <strong>API:</strong> <span id="apiUrl">http://localhost:3000</span>
+            </div>
+            <div class="status-item">
+                <strong>Token:</strong> <span id="tokenStatus">Not generated</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Authentication -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">1</span>
+                    Authentication
+                </h2>
+                <p style="margin-bottom: 15px; color: #666;">First, generate an access token to authenticate API requests.</p>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="generateToken()">
+                        <span>🔑</span> Generate Access Token
+                    </button>
+                    <button class="btn-secondary" onclick="clearToken()">
+                        <span>🗑️</span> Clear Token
+                    </button>
+                </div>
+                <div id="authResult"></div>
+                <div id="tokenDisplay" class="token-display" style="display: none;"></div>
+            </div>
+
+            <!-- Step 2: Create Consent -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">2</span>
+                    Consent Management
+                </h2>
+                <p style="margin-bottom: 15px; color: #666;">Create a consent to authorize insurance operations.</p>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="createConsent()" id="createConsentBtn" disabled>
+                        <span>📝</span> Create Consent
+                    </button>
+                    <button class="btn-secondary" onclick="listConsents()" id="listConsentsBtn" disabled>
+                        <span>📋</span> List Consents
+                    </button>
+                </div>
+                <div id="consentResult"></div>
+            </div>
+
+            <!-- Step 3: Create Insurance Quotes -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">3</span>
+                    Create Insurance Quotes
+                </h2>
+                <p style="margin-bottom: 15px; color: #666;">Select an insurance type and create a quote.</p>
+                
+                <div class="insurance-grid">
+                    <div class="insurance-card" onclick="selectInsurance('motor')" id="card-motor">
+                        <div class="icon">🚗</div>
+                        <strong>Motor</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('employment')" id="card-employment">
+                        <div class="icon">💼</div>
+                        <strong>Employment</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('health')" id="card-health">
+                        <div class="icon">🏥</div>
+                        <strong>Health</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('home')" id="card-home">
+                        <div class="icon">🏠</div>
+                        <strong>Home</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('life')" id="card-life">
+                        <div class="icon">❤️</div>
+                        <strong>Life</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('travel')" id="card-travel">
+                        <div class="icon">✈️</div>
+                        <strong>Travel</strong>
+                    </div>
+                    <div class="insurance-card" onclick="selectInsurance('renters')" id="card-renters">
+                        <div class="icon">🔑</div>
+                        <strong>Renters</strong>
+                    </div>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-primary" onclick="createQuote()" id="createQuoteBtn" disabled>
+                        <span>📊</span> Create Quote
+                    </button>
+                    <button class="btn-secondary" onclick="createAllQuotes()" id="createAllQuotesBtn" disabled>
+                        <span>🎯</span> Create All Insurance Types
+                    </button>
+                </div>
+                <div id="quoteResult"></div>
+            </div>
+
+            <!-- Step 4: Manage Quotes -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">4</span>
+                    Manage Quotes
+                </h2>
+                <p style="margin-bottom: 15px; color: #666;">View and accept/reject your quotes.</p>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="loadQuotes()" id="loadQuotesBtn" disabled>
+                        <span>🔄</span> Refresh Quotes
+                    </button>
+                </div>
+                <div id="quotesList"></div>
+            </div>
+
+            <!-- Step 5: Create Policies -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">5</span>
+                    Create Policies
+                </h2>
+                <p style="margin-bottom: 15px; color: #666;">Create policies from accepted quotes.</p>
+                <div id="policyResult"></div>
+            </div>
+
+            <!-- API Logs -->
+            <div class="section">
+                <h2>
+                    <span class="section-number">📝</span>
+                    API Logs
+                </h2>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('latest')">Latest</button>
+                    <button class="tab" onclick="switchTab('all')">All Logs</button>
+                </div>
+                <div id="tab-latest" class="tab-content active">
+                    <div id="latestLog"></div>
+                </div>
+                <div id="tab-all" class="tab-content">
+                    <button class="btn-secondary" onclick="clearLogs()" style="margin-bottom: 10px;">Clear All Logs</button>
+                    <div id="allLogs"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>UAE Open Finance Insurance API Test Interface | Made for testing • Not for production</p>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        const API_BASE_URL = 'http://localhost:3000';
+        let accessToken = null;
+        let selectedInsurance = 'motor';
+        let quotes = {};
+        let logs = [];
+
+        // Check server connection
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    document.getElementById('statusIndicator').classList.add('connected');
+                    document.getElementById('statusText').textContent = 'Connected';
+                    return true;
+                }
+            } catch (error) {
+                document.getElementById('statusText').textContent = 'Disconnected - Check if server is running';
+            }
+            return false;
+        }
+
+        // Generate UUID for FAPI headers
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Log API calls
+        function logAPI(method, endpoint, status, response) {
+            const log = {
+                timestamp: new Date().toLocaleTimeString(),
+                method,
+                endpoint,
+                status,
+                response
+            };
+            logs.unshift(log);
+            updateLogs();
+        }
+
+        function updateLogs() {
+            // Latest log
+            if (logs.length > 0) {
+                const latest = logs[0];
+                const className = latest.status >= 200 && latest.status < 300 ? 'success' : 'error';
+                document.getElementById('latestLog').innerHTML = `
+                    <div class="result-box ${className}">
+                        <strong>${latest.method} ${latest.endpoint}</strong> - ${latest.status}<br>
+                        <small>${latest.timestamp}</small>
+                        <pre>${JSON.stringify(latest.response, null, 2)}</pre>
+                    </div>
+                `;
+            }
+
+            // All logs
+            const allLogsHtml = logs.map(log => {
+                const className = log.status >= 200 && log.status < 300 ? 'success' : 'error';
+                return `
+                    <div class="result-box ${className}" style="margin-bottom: 10px;">
+                        <strong>${log.method} ${log.endpoint}</strong> - ${log.status}<br>
+                        <small>${log.timestamp}</small>
+                        <pre>${JSON.stringify(log.response, null, 2)}</pre>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('allLogs').innerHTML = allLogsHtml || '<p>No logs yet</p>';
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateLogs();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // Step 1: Generate Token
+        async function generateToken() {
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Generating...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/generate-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: 'test-client-123',
+                        scope: 'openid insurance accounts'
+                    })
+                });
+
+                const data = await response.json();
+                logAPI('POST', '/admin/generate-token', response.status, data);
+
+                if (response.ok) {
+                    accessToken = data.access_token;
+                    document.getElementById('authResult').innerHTML = `
+                        <div class="result-box success">
+                            <strong>✅ Token Generated Successfully!</strong><br>
+                            Expires in: ${data.expires_in} seconds
+                        </div>
+                    `;
+                    document.getElementById('tokenDisplay').style.display = 'block';
+                    document.getElementById('tokenDisplay').textContent = `Token: ${accessToken.substring(0, 50)}...`;
+                    document.getElementById('tokenStatus').textContent = 'Active';
+                    
+                    // Enable other buttons
+                    document.getElementById('createConsentBtn').disabled = false;
+                    document.getElementById('listConsentsBtn').disabled = false;
+                    document.getElementById('createQuoteBtn').disabled = false;
+                    document.getElementById('createAllQuotesBtn').disabled = false;
+                    document.getElementById('loadQuotesBtn').disabled = false;
+                } else {
+                    throw new Error(data.error || 'Failed to generate token');
+                }
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = `
+                    <div class="result-box error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🔑</span> Generate Access Token';
+            }
+        }
+
+        function clearToken() {
+            accessToken = null;
+            document.getElementById('tokenStatus').textContent = 'Not generated';
+            document.getElementById('tokenDisplay').style.display = 'none';
+            document.getElementById('authResult').innerHTML = '';
+            
+            // Disable other buttons
+            document.getElementById('createConsentBtn').disabled = true;
+            document.getElementById('listConsentsBtn').disabled = true;
+            document.getElementById('createQuoteBtn').disabled = true;
+            document.getElementById('createAllQuotesBtn').disabled = true;
+            document.getElementById('loadQuotesBtn').disabled = true;
+        }
+
+        // Step 2: Create Consent
+        async function createConsent() {
+            if (!accessToken) {
+                alert('Please generate a token first');
+                return;
+            }
+
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Creating...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/insurance-consents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID()
+                    },
+                    body: JSON.stringify({
+                        Data: {
+                            Permissions: [
+                                'ReadMotorInsurance',
+                                'CreateMotorInsuranceQuote',
+                                'ReadHealthInsurance',
+                                'CreateHealthInsuranceQuote'
+                            ],
+                            ExpirationDateTime: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                logAPI('POST', '/insurance-consents', response.status, data);
+
+                if (response.ok) {
+                    document.getElementById('consentResult').innerHTML = `
+                        <div class="result-box success">
+                            <strong>✅ Consent Created Successfully!</strong><br>
+                            Consent ID: ${data.Data.ConsentId}<br>
+                            Status: ${data.Data.Status}<br>
+                            Expires: ${new Date(data.Data.ExpirationDateTime).toLocaleString()}
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Failed to create consent');
+                }
+            } catch (error) {
+                document.getElementById('consentResult').innerHTML = `
+                    <div class="result-box error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>📝</span> Create Consent';
+            }
+        }
+
+        async function listConsents() {
+            if (!accessToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/insurance-consents`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'x-fapi-interaction-id': generateUUID()
+                    }
+                });
+
+                const data = await response.json();
+                logAPI('GET', '/insurance-consents', response.status, data);
+
+                if (response.ok && data.Data) {
+                    document.getElementById('consentResult').innerHTML = `
+                        <div class="result-box info">
+                            <strong>📋 Your Consents (${data.Data.length})</strong>
+                            <pre>${JSON.stringify(data.Data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error listing consents:', error);
+            }
+        }
+
+        // Step 3: Select Insurance Type
+        function selectInsurance(type) {
+            selectedInsurance = type;
+            document.querySelectorAll('.insurance-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById(`card-${type}`).classList.add('selected');
+        }
+
+        // Step 3: Create Quote
+        async function createQuote() {
+            if (!accessToken) {
+                alert('Please generate a token first');
+                return;
+            }
+
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Creating...';
+
+            const sampleData = getSampleData(selectedInsurance);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${selectedInsurance}-insurance-quotes`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID(),
+                        'x-fapi-customer-ip-address': '192.168.1.100'
+                    },
+                    body: JSON.stringify({ Data: sampleData })
+                });
+
+                const data = await response.json();
+                logAPI('POST', `/${selectedInsurance}-insurance-quotes`, response.status, data);
+
+                if (response.ok) {
+                    const quoteId = data.Data.QuoteId;
+                    quotes[quoteId] = { ...data.Data, type: selectedInsurance };
+                    
+                    document.getElementById('quoteResult').innerHTML = `
+                        <div class="result-box success">
+                            <strong>✅ ${selectedInsurance.toUpperCase()} Quote Created!</strong><br>
+                            Quote ID: ${quoteId}<br>
+                            Premium: ${data.Data.Premium.Currency} ${data.Data.Premium.TotalAmount}<br>
+                            Status: ${data.Data.Status}
+                            <pre>${JSON.stringify(data.Data, null, 2)}</pre>
+                        </div>
+                    `;
+                    loadQuotes();
+                } else {
+                    throw new Error('Failed to create quote');
+                }
+            } catch (error) {
+                document.getElementById('quoteResult').innerHTML = `
+                    <div class="result-box error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>📊</span> Create Quote';
+            }
+        }
+
+        async function createAllQuotes() {
+            const types = ['motor', 'employment', 'health', 'home', 'life', 'travel', 'renters'];
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            
+            let created = 0;
+            for (const type of types) {
+                btn.innerHTML = `<span class="loading"></span> Creating ${type}... (${created + 1}/${types.length})`;
+                selectedInsurance = type;
+                await createQuoteSilent(type);
+                created++;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<span>🎯</span> Create All Insurance Types';
+            document.getElementById('quoteResult').innerHTML = `
+                <div class="result-box success">
+                    <strong>✅ Created ${created} quotes for all insurance types!</strong>
+                </div>
+            `;
+            loadQuotes();
+        }
+
+        async function createQuoteSilent(type) {
+            if (!accessToken) return;
+
+            const sampleData = getSampleData(type);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${type}-insurance-quotes`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID(),
+                        'x-fapi-customer-ip-address': '192.168.1.100'
+                    },
+                    body: JSON.stringify({ Data: sampleData })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const quoteId = data.Data.QuoteId;
+                    quotes[quoteId] = { ...data.Data, type: type };
+                }
+            } catch (error) {
+                console.error(`Error creating ${type} quote:`, error);
+            }
+        }
+
+        // Step 4: Load and Manage Quotes
+        async function loadQuotes() {
+            const quoteIds = Object.keys(quotes);
+            if (quoteIds.length === 0) {
+                document.getElementById('quotesList').innerHTML = '<p style="color: #666;">No quotes created yet.</p>';
+                return;
+            }
+
+            let html = '<div class="quote-list">';
+            
+            for (const quoteId of quoteIds) {
+                const quote = quotes[quoteId];
+                const statusClass = quote.Status === 'Accepted' ? 'accepted' : quote.Status === 'Rejected' ? 'rejected' : 'pending';
+                
+                html += `
+                    <div class="quote-item">
+                        <div class="quote-info">
+                            <strong>${quote.type.toUpperCase()} Insurance</strong>
+                            <span class="badge badge-${statusClass.toLowerCase()}">${quote.Status}</span><br>
+                            <small>Quote ID: ${quoteId.substring(0, 8)}...</small><br>
+                            <small>Premium: ${quote.Premium.Currency} ${quote.Premium.TotalAmount}</small>
+                        </div>
+                        <div class="quote-actions">
+                            ${quote.Status === 'Pending' ? `
+                                <button class="btn-success" onclick="acceptQuote('${quoteId}', '${quote.type}')" style="padding: 8px 16px; font-size: 12px;">
+                                    ✅ Accept
+                                </button>
+                                <button class="btn-secondary" onclick="rejectQuote('${quoteId}', '${quote.type}')" style="padding: 8px 16px; font-size: 12px;">
+                                    ❌ Reject
+                                </button>
+                            ` : ''}
+                            ${quote.Status === 'Accepted' ? `
+                                <button class="btn-primary" onclick="createPolicy('${quoteId}', '${quote.type}')" style="padding: 8px 16px; font-size: 12px;">
+                                    📄 Create Policy
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            document.getElementById('quotesList').innerHTML = html;
+        }
+
+        async function acceptQuote(quoteId, type) {
+            if (!accessToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${type}-insurance-quotes/${quoteId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID()
+                    },
+                    body: JSON.stringify({
+                        Data: { Status: 'Accepted' }
+                    })
+                });
+
+                logAPI('PATCH', `/${type}-insurance-quotes/${quoteId}`, response.status, { Status: 'Accepted' });
+
+                if (response.ok) {
+                    quotes[quoteId].Status = 'Accepted';
+                    loadQuotes();
+                }
+            } catch (error) {
+                console.error('Error accepting quote:', error);
+            }
+        }
+
+        async function rejectQuote(quoteId, type) {
+            if (!accessToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${type}-insurance-quotes/${quoteId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID()
+                    },
+                    body: JSON.stringify({
+                        Data: { Status: 'Rejected' }
+                    })
+                });
+
+                logAPI('PATCH', `/${type}-insurance-quotes/${quoteId}`, response.status, { Status: 'Rejected' });
+
+                if (response.ok) {
+                    quotes[quoteId].Status = 'Rejected';
+                    loadQuotes();
+                }
+            } catch (error) {
+                console.error('Error rejecting quote:', error);
+            }
+        }
+
+        // Step 5: Create Policy
+        async function createPolicy(quoteId, type) {
+            if (!accessToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${type}-insurance-quotes/${quoteId}/policy`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                        'x-fapi-interaction-id': generateUUID()
+                    }
+                });
+
+                const data = await response.json();
+                logAPI('POST', `/${type}-insurance-quotes/${quoteId}/policy`, response.status, data);
+
+                if (response.ok) {
+                    document.getElementById('policyResult').innerHTML = `
+                        <div class="result-box success">
+                            <strong>✅ Policy Created Successfully!</strong><br>
+                            Policy ID: ${data.Data.PolicyId}<br>
+                            Policy Number: ${data.Data.PolicyNumber}<br>
+                            Status: ${data.Data.Status}<br>
+                            Effective Date: ${new Date(data.Data.EffectiveDate).toLocaleDateString()}<br>
+                            Expiry Date: ${new Date(data.Data.ExpiryDate).toLocaleDateString()}
+                            <pre>${JSON.stringify(data.Data, null, 2)}</pre>
+                        </div>
+                    `;
+                    quotes[quoteId].Status = 'Converted';
+                    loadQuotes();
+                } else {
+                    throw new Error('Failed to create policy');
+                }
+            } catch (error) {
+                document.getElementById('policyResult').innerHTML = `
+                    <div class="result-box error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Sample data generator
+        function getSampleData(type) {
+            const baseCustomer = {
+                FirstName: 'Ahmed',
+                LastName: 'Al-Mansouri',
+                Gender: 'Male',
+                DateOfBirth: '1990-05-15',
+                MaritalStatus: 'Married',
+                MobileNumber: '+971501234567',
+                EmailAddress: 'ahmed.almansouri@example.ae',
+                Nationality: 'ARE'
+            };
+
+            const samples = {
+                motor: {
+                    Customer: baseCustomer,
+                    VehicleDetails: {
+                        Make: 'Toyota',
+                        Model: 'Camry',
+                        Year: 2022,
+                        ChassisNumber: 'JTNB11HK0J3012345',
+                        EstimatedValue: { Currency: 'AED', Amount: '95000.00' }
+                    }
+                },
+                employment: {
+                    Customer: baseCustomer,
+                    EmploymentDetails: {
+                        EmployerName: 'Tech Corporation LLC',
+                        JobTitle: 'Senior Engineer',
+                        Salary: { Currency: 'AED', Amount: '25000.00' },
+                        EmploymentSector: 'Private'
+                    }
+                },
+                health: {
+                    Customer: baseCustomer
+                },
+                home: {
+                    Customer: baseCustomer,
+                    PropertyDetails: {
+                        PropertyType: 'Villa',
+                        EstimatedValue: { Currency: 'AED', Amount: '2500000.00' }
+                    }
+                },
+                life: {
+                    Customer: baseCustomer,
+                    Coverage: {
+                        SumAssured: { Currency: 'AED', Amount: '1000000.00' },
+                        Term: 20
+                    }
+                },
+                travel: {
+                    Customer: baseCustomer,
+                    TripDetails: {
+                        Type: 'Single Trip',
+                        Destination: 'Europe',
+                        TripCost: { Currency: 'AED', Amount: '15000.00' }
+                    }
+                },
+                renters: {
+                    Customer: baseCustomer,
+                    Coverage: {
+                        ContentsValue: { Currency: 'AED', Amount: '100000.00' }
+                    }
+                }
+            };
+
+            return samples[type];
+        }
+
+        // Initialize
+        window.onload = async function() {
+            await checkConnection();
+            selectInsurance('motor');
+        };
+    </script>
+</body>
+</html>

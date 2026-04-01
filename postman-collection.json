@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "UAE Open Finance Insurance API",
+    "description": "Complete collection for testing UAE Open Finance Insurance APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consent_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "quote_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "    pm.test('Token received', function () {",
+                  "        pm.expect(jsonData.access_token).to.be.a('string');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                },
+                {
+                  "key": "client_id",
+                  "value": "test-client-123"
+                },
+                {
+                  "key": "client_assertion_type",
+                  "value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+                },
+                {
+                  "key": "client_assertion",
+                  "value": "dummy-jwt-assertion"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid insurance accounts"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consent Management",
+      "item": [
+        {
+          "name": "Create Consent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('consent_id', jsonData.Data.ConsentId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Data\": {\n    \"Permissions\": [\n      \"ReadMotorInsurance\",\n      \"CreateMotorInsuranceQuote\"\n    ],\n    \"ExpirationDateTime\": \"2025-12-31T23:59:59Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/insurance-consents",
+              "host": ["{{base_url}}"],
+              "path": ["insurance-consents"]
+            }
+          }
+        },
+        {
+          "name": "Get Consent",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/insurance-consents/{{consent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["insurance-consents", "{{consent_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Motor Insurance",
+      "item": [
+        {
+          "name": "Create Motor Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('quote_id', jsonData.Data.QuoteId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "x-fapi-customer-ip-address",
+                "value": "192.168.1.100"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Data\": {\n    \"Customer\": {\n      \"FirstName\": \"Ahmed\",\n      \"LastName\": \"Al-Mansouri\",\n      \"Gender\": \"Male\",\n      \"DateOfBirth\": \"1990-05-15\",\n      \"MaritalStatus\": \"Married\",\n      \"MobileNumber\": \"+971501234567\",\n      \"EmailAddress\": \"ahmed.almansouri@example.ae\",\n      \"Nationality\": \"ARE\"\n    },\n    \"VehicleDetails\": {\n      \"Make\": \"Toyota\",\n      \"Model\": \"Camry\",\n      \"Year\": 2022,\n      \"ChassisNumber\": \"JTNB11HK0J3012345\",\n      \"EstimatedValue\": {\n        \"Currency\": \"AED\",\n        \"Amount\": \"95000.00\"\n      }\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/motor-insurance-quotes",
+              "host": ["{{base_url}}"],
+              "path": ["motor-insurance-quotes"]
+            }
+          }
+        },
+        {
+          "name": "Get Motor Quote",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/motor-insurance-quotes/{{quote_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["motor-insurance-quotes", "{{quote_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Accept Motor Quote",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Data\": {\n    \"Status\": \"Accepted\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/motor-insurance-quotes/{{quote_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["motor-insurance-quotes", "{{quote_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Policy from Quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-fapi-interaction-id",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/motor-insurance-quotes/{{quote_id}}/policy",
+              "host": ["{{base_url}}"],
+              "path": ["motor-insurance-quotes", "{{quote_id}}", "policy"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
